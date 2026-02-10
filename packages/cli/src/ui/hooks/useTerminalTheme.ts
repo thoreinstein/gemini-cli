@@ -106,6 +106,7 @@ export function useTerminalTheme(
     settings.merged.ui.terminalBackgroundPollingInterval,
     settings.merged.ui.preferredLightTheme,
     settings.merged.ui.preferredDarkTheme,
+    stdout,
     config,
     handleThemeSelect,
     subscribe,

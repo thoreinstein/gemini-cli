@@ -149,7 +149,7 @@ describe('useTerminalTheme', () => {
   it('should switch to preferred light theme if set', () => {
     mockSettings.merged.ui.preferredLightTheme = 'my-light-theme';
 
-    renderHook(() => useTerminalTheme(mockHandleThemeSelect, config, vi.fn()));
+    renderHook(() => useTerminalTheme(mockHandleThemeSelect, config));
 
     const handler = mockSubscribe.mock.calls[0][0];
 
