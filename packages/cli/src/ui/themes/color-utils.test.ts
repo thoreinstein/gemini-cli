@@ -483,7 +483,6 @@ describe('Color Utils', () => {
           DEFAULT_LIGHT_THEME,
           'preferred-dark',
           'preferred-light',
-<<<<<<< HEAD
           [
             DEFAULT_THEME,
             DEFAULT_LIGHT_THEME,
@@ -540,10 +539,8 @@ describe('Color Utils', () => {
         ),
       ).toBeUndefined();
     });
-=======
         ),
       ).toBe('preferred-dark');
     });
->>>>>>> e070c236 (feat(gemini-cli-aes.2): update theme switching logic for preferences)
   });
 });
