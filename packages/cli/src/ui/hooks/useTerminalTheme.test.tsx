@@ -57,6 +57,11 @@ vi.mock('../themes/theme-manager.js', async () => {
       isDefaultTheme: (name: string) =>
         name === 'default' || name === 'default-light',
       setTerminalBackground: vi.fn(),
+      getAvailableThemes: () => [
+        { name: 'default' },
+        { name: 'default-light' },
+        { name: 'my-light-theme' },
+      ],
     },
     DEFAULT_THEME: { name: 'default' },
   };
