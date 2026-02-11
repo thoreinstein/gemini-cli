@@ -234,6 +234,7 @@ export class OAuthUtils {
     try {
       // RFC 9728 §3.1: Construct well-known URL by inserting /.well-known/oauth-protected-resource
       // between the host and path. This is the RFC-compliant approach.
+      let usedUrl = serverUrl;
       const wellKnownUrls = this.buildWellKnownUrls(serverUrl);
       let resourceMetadata = await this.fetchProtectedResourceMetadata(
         wellKnownUrls.protectedResource,
@@ -248,6 +249,10 @@ export class OAuthUtils {
           resourceMetadata = await this.fetchProtectedResourceMetadata(
             rootBasedUrls.protectedResource,
           );
+          if (resourceMetadata) {
+            // If we found metadata at the root, use the root URL for validation
+            usedUrl = `${url.protocol}//${url.host}/`;
+          }
         }
       }
 
@@ -255,8 +260,14 @@ export class OAuthUtils {
         // RFC 9728 Section 7.3: The client MUST ensure that the resource identifier URL
         // it is using as the prefix for the metadata request exactly matches the value
         // of the resource metadata parameter in the protected resource metadata document.
-        const expectedResource = this.buildResourceParameter(serverUrl);
-        if (resourceMetadata.resource !== expectedResource) {
+        const expectedResource = this.buildResourceParameter(usedUrl);
+
+        // Normalize by removing trailing slashes for the comparison to be robust
+        // against servers that omit it in their metadata resource field.
+        const normalizedResource = resourceMetadata.resource.replace(/\/$/, '');
+        const normalizedExpected = expectedResource.replace(/\/$/, '');
+
+        if (normalizedResource !== normalizedExpected) {
           throw new ResourceMismatchError(
             `Protected resource ${resourceMetadata.resource} does not match expected ${expectedResource}`,
           );
@@ -347,7 +358,12 @@ export class OAuthUtils {
     if (resourceMetadata && mcpServerUrl) {
       // Validate resource parameter per RFC 9728 Section 7.3
       const expectedResource = this.buildResourceParameter(mcpServerUrl);
-      if (resourceMetadata.resource !== expectedResource) {
+
+      // Normalize by removing trailing slashes for the comparison
+      const normalizedResource = resourceMetadata.resource.replace(/\/$/, '');
+      const normalizedExpected = expectedResource.replace(/\/$/, '');
+
+      if (normalizedResource !== normalizedExpected) {
         throw new ResourceMismatchError(
           `Protected resource ${resourceMetadata.resource} does not match expected ${expectedResource}`,
         );
