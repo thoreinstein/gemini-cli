@@ -271,6 +271,55 @@ describe('OAuthUtils', () => {
         OAuthUtils.discoverOAuthConfig('https://example.com/mcp'),
       ).rejects.toThrow(/does not match expected/);
     });
+
+    it('should succeed when falling back to root discovery and resource matches root', async () => {
+      mockFetch
+        // 1. Path-based discovery fails
+        .mockResolvedValueOnce({ ok: false })
+        // 2. Root-based discovery succeeds
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              ...mockResourceMetadata,
+              resource: 'https://example.com', // Server reports root as resource
+            }),
+        })
+        // 3. Authorization server metadata discovery
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve(mockAuthServerMetadata),
+        });
+
+      const config = await OAuthUtils.discoverOAuthConfig(
+        'https://example.com/mcp',
+      );
+
+      expect(config).toBeDefined();
+    });
+
+    it('should succeed when resource differs only by trailing slash', async () => {
+      mockFetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              ...mockResourceMetadata,
+              resource: 'https://example.com/mcp', // No trailing slash
+            }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve(mockAuthServerMetadata),
+        });
+
+      // buildResourceParameter returns 'https://example.com/mcp/' (with slash) if called with 'https://example.com/mcp/'
+      const config = await OAuthUtils.discoverOAuthConfig(
+        'https://example.com/mcp/',
+      );
+
+      expect(config).toBeDefined();
+    });
   });
 
   describe('metadataToOAuthConfig', () => {
