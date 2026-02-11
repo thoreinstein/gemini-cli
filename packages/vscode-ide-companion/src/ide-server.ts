@@ -9,7 +9,7 @@ import {
   CloseDiffRequestSchema,
   IdeContextNotificationSchema,
   OpenDiffRequestSchema,
-} from '@google/gemini-cli-core/src/ide/types.js';
+} from '@google/gemini-cli-core';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
@@ -36,9 +36,24 @@ class CORSError extends Error {
 }
 
 const MCP_SESSION_ID_HEADER = 'mcp-session-id';
+const MCP_SESSION_ID_HEADER_LOWER = MCP_SESSION_ID_HEADER.toLowerCase();
 const IDE_SERVER_PORT_ENV_VAR = 'GEMINI_CLI_IDE_SERVER_PORT';
 const IDE_WORKSPACE_PATH_ENV_VAR = 'GEMINI_CLI_IDE_WORKSPACE_PATH';
 const IDE_AUTH_TOKEN_ENV_VAR = 'GEMINI_CLI_IDE_AUTH_TOKEN';
+
+function getHeaderValue(
+  headers: Request['headers'],
+  headerName: string,
+): string | undefined {
+  const value = headers[headerName];
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value[0];
+  }
+  return undefined;
+}
 
 interface WritePortAndWorkspaceArgs {
   context: vscode.ExtensionContext;
@@ -211,7 +226,10 @@ export class IDEServer {
       context.subscriptions.push(onDidChangeDiffSubscription);
 
       app.post('/mcp', async (req: Request, res: Response) => {
-        const sessionId = getSessionId(req);
+        const sessionId = getHeaderValue(
+          req.headers,
+          MCP_SESSION_ID_HEADER_LOWER,
+        );
         let transport: StreamableHTTPServerTransport;
 
         if (sessionId && this.transports[sessionId]) {
@@ -293,7 +311,10 @@ export class IDEServer {
       });
 
       const handleSessionRequest = async (req: Request, res: Response) => {
-        const sessionId = getSessionId(req);
+        const sessionId = getHeaderValue(
+          req.headers,
+          MCP_SESSION_ID_HEADER_LOWER,
+        );
         if (!sessionId || !this.transports[sessionId]) {
           this.log('Invalid or missing session ID');
           res.status(400).send('Invalid or missing session ID');
