@@ -7,7 +7,7 @@
 import {
   IdeDiffAcceptedNotificationSchema,
   IdeDiffRejectedNotificationSchema,
-} from '@google/gemini-cli-core/src/ide/types.js';
+} from '@google/gemini-cli-core';
 import { type JSONRPCNotification } from '@modelcontextprotocol/sdk/types.js';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
@@ -243,11 +243,15 @@ export class DiffManager {
     // Find and close the tab corresponding to the diff view
     for (const tabGroup of vscode.window.tabGroups.all) {
       for (const tab of tabGroup.tabs) {
-        const input = tab.input as {
-          modified?: vscode.Uri;
-          original?: vscode.Uri;
-        };
-        if (input && input.modified?.toString() === rightDocUri.toString()) {
+        const input = tab.input;
+        if (!input || typeof input !== 'object') {
+          continue;
+        }
+        const modified = Reflect.get(input, 'modified');
+        if (
+          modified instanceof vscode.Uri &&
+          modified.toString() === rightDocUri.toString()
+        ) {
           await vscode.window.tabGroups.close(tab);
           return;
         }
