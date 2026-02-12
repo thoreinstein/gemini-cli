@@ -149,7 +149,7 @@ describe('useTerminalTheme', () => {
   it('should switch to preferred light theme if set', () => {
     mockSettings.merged.ui.preferredLightTheme = 'my-light-theme';
 
-    renderHook(() => useTerminalTheme(mockHandleThemeSelect, config));
+    renderHook(() => useTerminalTheme(mockHandleThemeSelect, config, vi.fn()));
 
     const handler = mockSubscribe.mock.calls[0][0];
 
@@ -166,10 +166,10 @@ describe('useTerminalTheme', () => {
     mockSettings.merged.ui.preferredLightTheme = 'my-light-theme';
     mockSettings.merged.ui.theme = 'my-light-theme'; // Current theme is preferred light
 
-    renderHook(() => useTerminalTheme(mockHandleThemeSelect, config));
+    renderHook(() => useTerminalTheme(mockHandleThemeSelect, config, vi.fn()));
 
     vi.advanceTimersByTime(60000);
-    expect(mockWrite).toHaveBeenCalled(); // Should poll
+    expect(mockQueryTerminalBackground).toHaveBeenCalled(); // Should poll
   });
 
   it('should switch to dark theme when background is dark', () => {
