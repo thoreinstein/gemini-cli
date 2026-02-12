@@ -151,6 +151,27 @@ describe('ExtensionManager theme loading', () => {
     ]);
   });
 
+  it('should register themes before config initialization', async () => {
+    createExtension({
+      extensionsDir: userExtensionsDir,
+      name: 'my-theme-extension',
+      themes: [
+        {
+          name: 'My-Awesome-Theme',
+          type: 'custom',
+          text: {
+            primary: '#FF00FF',
+          },
+        },
+      ],
+    });
+
+    await extensionManager.loadExtensions();
+
+    const namespacedThemeName = 'My-Awesome-Theme (my-theme-extension)';
+    expect(themeManager.findThemeByName(namespacedThemeName)).toBeTruthy();
+  });
+
   it('should revert to default theme when extension is stopped', async () => {
     const extensionName = 'my-theme-extension';
     const themeName = 'My-Awesome-Theme';
