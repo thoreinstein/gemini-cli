@@ -788,6 +788,12 @@ Would you like to attempt to install via "git clone" instead?`,
       };
       this.loadedExtensions = [...this.loadedExtensions, extension];
 
+      // Register themes immediately so UI/theme validation can see them
+      // before Config.initialize() starts extensions.
+      if (!this.config && extension.isActive && extension.themes) {
+        themeManager.registerExtensionThemes(extension.name, extension.themes);
+      }
+
       await this.maybeStartExtension(extension);
       return extension;
     } catch (e) {
@@ -1003,6 +1009,12 @@ Would you like to attempt to install via "git clone" instead?`,
       // Only toggle the isActive state if we are actually going to disable it
       // in the current session, or we haven't been initialized yet.
       extension.isActive = false;
+      if (!this.config && extension.themes) {
+        themeManager.unregisterExtensionThemes(
+          extension.name,
+          extension.themes,
+        );
+      }
     }
     await this.maybeStopExtension(extension);
   }
@@ -1038,6 +1050,9 @@ Would you like to attempt to install via "git clone" instead?`,
       // Only toggle the isActive state if we are actually going to disable it
       // in the current session, or we haven't been initialized yet.
       extension.isActive = true;
+      if (!this.config && extension.themes) {
+        themeManager.registerExtensionThemes(extension.name, extension.themes);
+      }
     }
     await this.maybeStartExtension(extension);
   }
