@@ -127,11 +127,6 @@ function sendIdeContextUpdateNotification(
   transport.send(notification);
 }
 
-function getSessionId(req: Request): string | undefined {
-  const header = req.headers[MCP_SESSION_ID_HEADER];
-  return Array.isArray(header) ? header[0] : header;
-}
-
 export class IDEServer {
   private server: HTTPServer | undefined;
   private context: vscode.ExtensionContext | undefined;
