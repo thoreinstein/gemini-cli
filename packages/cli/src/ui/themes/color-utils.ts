@@ -238,19 +238,6 @@ export function shouldSwitchTheme(
       ? preferredDarkThemeName
       : defaultThemeName;
 
-): string | undefined {
-  const targetLightTheme =
-    preferredLightThemeName &&
-    availableThemeNames?.includes(preferredLightThemeName)
-      ? preferredLightThemeName
-      : defaultLightThemeName;
-
-  const targetDarkTheme =
-    preferredDarkThemeName &&
-    availableThemeNames?.includes(preferredDarkThemeName)
-      ? preferredDarkThemeName
-      : defaultThemeName;
-
   const isDarkActive =
     currentThemeName === defaultThemeName ||
     currentThemeName === preferredDarkThemeName ||

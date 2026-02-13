@@ -539,8 +539,5 @@ describe('Color Utils', () => {
         ),
       ).toBeUndefined();
     });
-        ),
-      ).toBe('preferred-dark');
-    });
   });
 });
